@@ -1,17 +1,43 @@
+def VAR = null
 pipeline { 
   
    agent any
   environment{
     DEV_ENV = 'devserver_ip'
+    // VAR = null
   }
+  options {
+        skipDefaultCheckout(true)
+    }
 
    stages {
+      stage('Set Environment') {
+            steps {
+                script {
+                    def branchName = env.BRANCH_NAME
+                    sh "echo '${env.BRANCH_NAME}'"
+                    if (branchName == 'dev') {
+                      sh "echo 'DEV==>'"
+                      VAR = 'development' 
+                      echo "var======> ${VAR}"
+                      //ENV = credentials('DEV_ENV')
+                    } else if (branchName == 'qa') {
+                      sh "echo 'QA==>'"
+                      VAR = 'quality analyst'  
+                      //ENV = credentials('QA_ENV')
+                       echo "var======> ${VAR}"
+                    } else {
+                        error "Branch not supported"
+                    }
+                }
+            }
+        }
    
      stage('Install Dependencies') { 
         steps { 
-           sh 'echo "Install Dependencies ${DEV_ENV} ${GIT_URL}"'
+           sh 'echo "Install Dependencies ${VAR}  ==>>  ${DEV_ENV} ${GIT_URL}"'
            script{
-             echo "Current branch: Dunkins_${env.BRANCH_NAME}_env"
+             echo "Current branch: ${VAR} Dunkins_${env.BRANCH_NAME}_env"
              echo "Git repo: ${env.GIT_URL}"
            }
         }
@@ -80,4 +106,11 @@ pipeline {
   
    	}
 
+    
+
+    
+
+
+
+  
    }
